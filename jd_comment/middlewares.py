@@ -7,6 +7,8 @@ from scrapy import signals
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
+import random
+import logging
 
 
 class JdCommentSpiderMiddleware:
@@ -101,3 +103,36 @@ class JdCommentDownloaderMiddleware:
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
+class ProxyMiddleware:
+    """设置随机代理ip的中间件"""
+
+    def __init__(self, proxy_list):
+        self._proxy_list = proxy_list
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        proxy_list = crawler.settings.get('PROXY_LIST')
+        return cls(proxy_list)
+
+    def process_request(self, request, spider):
+        # 随机从其中选择一个
+        proxy = random.choice(self._proxy_list)
+        # 记录结果
+        logging.debug("this is request ip:" + str(proxy))
+        # 设置request的proxy属性的内容为代理ip
+        request.meta['proxy'] = proxy
+
+    def process_response(self, request, response, spider):
+        # 请求失败
+        if response.status != 200:
+            # 重新选择一个代理ip
+            proxy = random.choice(self._proxy_list)
+            # 记录结果
+            logging.debug("this is response ip:" + str(proxy))
+            # 设置新的代理ip内容
+            request.mete['proxy'] = proxy
+            return request
+        return response
+

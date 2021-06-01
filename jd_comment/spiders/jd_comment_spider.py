@@ -24,7 +24,9 @@ class JdCommentSpiderSpider(scrapy.Spider):
         productIds = [
             '100019791960',
             '100018601954',
-            '100018927438'
+            '100018927438',
+            '100009956275',
+            '100009077475'
         ]
         # url模板
         url_template = "https://club.jd.com/comment/productPageComments.action?callback=fetchJSON_comment98&" \
